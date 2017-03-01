@@ -15,6 +15,10 @@ import ckan.logic as logic
 
 from ckan.lib.munge import munge_name
 from ckanext.taxonomy.models import Taxonomy, TaxonomyTerm
+from sqlalchemy import update
+
+import pprint
+import ckan.model as model2
 
 _check_access = logic.check_access
 
@@ -183,6 +187,33 @@ def taxonomy_term_list(context, data_dict):
 
 
 @toolkit.side_effect_free
+def taxonomy_term_autocomplete(context, data_dict):
+    '''
+    Return a list of organization names that contain a string.
+
+    :param q: the string to search for
+    :type q: string
+    :param limit: the maximum number of organizations to return (optional,
+        default: 20)
+    :type limit: int
+
+    :rtype: a list of organization dictionaries each with keys ``'name'``,
+        ``'title'``, and ``'id'``
+    '''
+
+    # _check_access('organization_autocomplete', context, data_dict)
+    q = data_dict['q']
+    limit = data_dict.get('limit', 10)
+    model = context['model']
+    like_q = u'%' + q + u'%'
+
+    query = model.Session.query(TaxonomyTerm) \
+                .filter(TaxonomyTerm.label.ilike(like_q))
+
+    return [taxonomyterm.label for taxonomyterm in query]
+
+
+@toolkit.side_effect_free
 def taxonomy_term_tree(context, data_dict):
     """
     Returns the taxonomy terms as a tree for the given taxonomy
@@ -231,6 +262,7 @@ def taxonomy_term_show(context, data_dict):
         raise logic.ValidationError("Either id or uri is required")
 
     term = TaxonomyTerm.get(id or uri)
+
     if not term:
         raise logic.NotFound()
 
@@ -292,20 +324,21 @@ def taxonomy_term_update(context, data_dict):
     :returns: The newly updated term
     :rtype: A dictionary
     """
+
     _check_access('taxonomy_term_update', context, data_dict)
     model = context['model']
 
     id = logic.get_or_bust(data_dict, 'id')
-
     term = TaxonomyTerm.get(id)
+
     if not term:
         raise logic.NotFound()
 
     term.label = data_dict.get('label', term.label)
     term.parent_id = data_dict.get('parent_id', term.parent_id)
     term.uri = logic.get_or_bust(data_dict, 'uri')
-    term.description = data_dict.get('description', '')
-    term.extras = data_dict.get('extras', '')
+    term.description = data_dict.get('description', term.description)
+    #term.extras = data_dict.get('extras', '')
 
     model.Session.add(term)
     model.Session.commit()

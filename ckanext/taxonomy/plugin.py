@@ -65,7 +65,9 @@ class TaxonomyPlugin(p.SingletonPlugin):
             'taxonomy_term_show_bulk': actions.taxonomy_term_show_bulk,
             'taxonomy_term_create': actions.taxonomy_term_create,
             'taxonomy_term_update': actions.taxonomy_term_update,
-            'taxonomy_term_delete': actions.taxonomy_term_delete
+            'taxonomy_term_delete': actions.taxonomy_term_delete,
+
+            'taxonomy_term_autocomplete':   actions.taxonomy_term_autocomplete
         }
 
     def get_auth_functions(self):
