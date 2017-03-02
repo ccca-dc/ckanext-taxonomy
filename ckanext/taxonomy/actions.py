@@ -189,7 +189,7 @@ def taxonomy_term_list(context, data_dict):
 @toolkit.side_effect_free
 def taxonomy_term_autocomplete(context, data_dict):
     '''
-    Return a list of organization names that contain a string.
+    Return a list of taxonomy terms names that contain a string.
 
     :param q: the string to search for
     :type q: string
@@ -207,10 +207,23 @@ def taxonomy_term_autocomplete(context, data_dict):
     model = context['model']
     like_q = u'%' + q + u'%'
 
+    all_terms = taxonomy_term_list(context, {'id': '8f7227c6-3c8e-4611-a9d9-69abafed1eda'})
+
     query = model.Session.query(TaxonomyTerm) \
                 .filter(TaxonomyTerm.label.ilike(like_q))
 
-    return [taxonomyterm.label for taxonomyterm in query]
+    term_list = [term.as_dict() for term in query]
+
+    for term in all_terms:
+        try:
+            for item in term_list:
+                if item['id'] == term['parent_id']:
+                    term_list.remove(item)
+        except:
+            pass
+
+    return [term['label'] for term in term_list]
+    # return [taxonomyterm.label for taxonomyterm in query]
 
 
 @toolkit.side_effect_free
