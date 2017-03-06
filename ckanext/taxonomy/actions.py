@@ -203,14 +203,24 @@ def taxonomy_term_autocomplete(context, data_dict):
 
     # _check_access('organization_autocomplete', context, data_dict)
     q = data_dict['q']
+    tax_name = data_dict['tax_name']
     limit = data_dict.get('limit', 10)
     model = context['model']
     like_q = u'%' + q + u'%'
 
-    all_terms = taxonomy_term_list(context, {'id': '8f7227c6-3c8e-4611-a9d9-69abafed1eda'})
+    if tax_name != '':
+        taxonomy = taxonomy_show(context, {'name': tax_name})
+        all_terms = taxonomy_term_list(context, {'id': taxonomy['id']})
 
-    query = model.Session.query(TaxonomyTerm) \
-                .filter(TaxonomyTerm.label.ilike(like_q))
+        query = model.Session.query(TaxonomyTerm) \
+                    .filter(TaxonomyTerm.label.ilike(like_q)) \
+                    .filter(TaxonomyTerm.taxonomy_id == taxonomy['id'])
+    else:
+        queryAll = model.Session.query(TaxonomyTerm).order_by('label')
+        all_terms = [term.as_dict() for term in queryAll]
+
+        query = model.Session.query(TaxonomyTerm) \
+                    .filter(TaxonomyTerm.label.ilike(like_q))
 
     term_list = [term.as_dict() for term in query]
 
@@ -223,7 +233,6 @@ def taxonomy_term_autocomplete(context, data_dict):
             pass
 
     return [term['label'] for term in term_list]
-    # return [taxonomyterm.label for taxonomyterm in query]
 
 
 @toolkit.side_effect_free
