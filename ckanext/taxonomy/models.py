@@ -106,6 +106,21 @@ class TaxonomyTerm(Base):
         return obj
 
     @classmethod
+    def getnew(cls, uri_or_id):
+        q = model.Session.query(TaxonomyTerm)\
+            .filter(TaxonomyTerm.uri == uri_or_id)
+        obj = q.first()
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.id == uri_or_id)
+            obj = q.first()
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.label == uri_or_id)
+            obj = q.first()
+        return obj
+
+    @classmethod
     def by_uri(cls, uri):
         q = model.Session.query(TaxonomyTerm)\
             .filter(TaxonomyTerm.uri == uri)

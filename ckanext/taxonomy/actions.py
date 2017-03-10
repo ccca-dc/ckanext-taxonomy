@@ -279,11 +279,12 @@ def taxonomy_term_show(context, data_dict):
 
     id = data_dict.get('id')
     uri = data_dict.get('uri')
+    label = data_dict.get('label')
 
-    if not id and not uri:
-        raise logic.ValidationError("Either id or uri is required")
+    if not id and not uri and not label:
+        raise logic.ValidationError("Either id, uri or label is required")
 
-    term = TaxonomyTerm.get(id or uri)
+    term = TaxonomyTerm.getnew(id or uri or label)
 
     if not term:
         raise logic.NotFound()
