@@ -33,6 +33,7 @@ class Taxonomy(Base):
     name = Column(types.UnicodeText, unique=True)
     title = Column(types.UnicodeText)
     uri = Column(types.UnicodeText)
+    last_modified = Column(types.DATE)
 
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
@@ -58,6 +59,7 @@ class Taxonomy(Base):
             'name': self.name,
             'title': self.title,
             'uri': self.uri,
+            'last_modified': self.last_modified.isoformat() if self.last_modified else None,
         }
 
     def __repr__(self):
@@ -117,6 +119,40 @@ class TaxonomyTerm(Base):
         if not obj:
             q = model.Session.query(TaxonomyTerm)\
                 .filter(TaxonomyTerm.label == uri_or_id)
+            obj = q.first()
+        return obj
+
+    @classmethod
+    def get_all(cls, uri_or_id):
+        q = model.Session.query(TaxonomyTerm)\
+            .filter(TaxonomyTerm.uri == uri_or_id).all()
+        obj = q
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.id == uri_or_id).all()
+            obj = q
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.label == uri_or_id)
+            obj = q.all()
+        return obj
+
+
+    @classmethod
+    def get_from_taxonomy(cls, uri_or_id, taxonomy_id):
+        q = model.Session.query(TaxonomyTerm)\
+            .filter(TaxonomyTerm.uri == uri_or_id)\
+            .filter(TaxonomyTerm.taxonomy_id == taxonomy_id)
+        obj = q.first()
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.id == uri_or_id)\
+                .filter(TaxonomyTerm.taxonomy_id == taxonomy_id)
+            obj = q.first()
+        if not obj:
+            q = model.Session.query(TaxonomyTerm)\
+                .filter(TaxonomyTerm.label == uri_or_id)\
+                .filter(TaxonomyTerm.taxonomy_id == taxonomy_id)
             obj = q.first()
         return obj
 

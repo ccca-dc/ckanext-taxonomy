@@ -67,6 +67,7 @@ class TaxonomyPlugin(p.SingletonPlugin):
             'taxonomy_term_update': actions.taxonomy_term_update,
             'taxonomy_term_delete': actions.taxonomy_term_delete,
 
+            'taxonomy_term_show_all':   actions.taxonomy_term_show_all,
             'taxonomy_term_autocomplete':   actions.taxonomy_term_autocomplete
         }
 

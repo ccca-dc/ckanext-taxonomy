@@ -20,7 +20,12 @@ from sqlalchemy import update
 import pprint
 import ckan.model as model2
 
+import ckan.lib.navl.dictization_functions
+import ckan.lib.helpers as h
+
 _check_access = logic.check_access
+_validate = ckan.lib.navl.dictization_functions.validate
+ValidationError = logic.ValidationError
 
 
 @toolkit.side_effect_free
@@ -86,6 +91,7 @@ def taxonomy_create(context, data_dict):
 
     title = logic.get_or_bust(data_dict, 'title')
     uri = logic.get_or_bust(data_dict, 'uri')
+    last_modified = logic.get_or_bust(data_dict, 'last_modified')
 
     if not name:
         name = munge_name(title)
@@ -94,7 +100,7 @@ def taxonomy_create(context, data_dict):
     if model.Session.query(Taxonomy).filter(Taxonomy.name == name).count() > 0:
         raise logic.ValidationError("Name is already in use")
 
-    t = Taxonomy(name=name, title=title, uri=uri)
+    t = Taxonomy(name=name, title=title, uri=uri, last_modified=last_modified)
     model.Session.add(t)
     model.Session.commit()
 
@@ -118,14 +124,21 @@ def taxonomy_update(context, data_dict):
     name = logic.get_or_bust(data_dict, 'name')
     title = logic.get_or_bust(data_dict, 'title')
     uri = logic.get_or_bust(data_dict, 'uri')
+    last_modified = logic.get_or_bust(data_dict, 'last_modified')
 
     tax = Taxonomy.get(id)
     if not tax:
         raise logic.NotFound()
 
+    try:
+        last_modified = h.date_str_to_datetime(last_modified)
+    except:
+        raise logic.ValidationError('Timestamp did not parse')
+
     tax.name = name
     tax.title = title
     tax.uri = uri
+    tax.last_modified = last_modified
 
     model.Session.add(tax)
     model.Session.commit()
@@ -275,21 +288,52 @@ def taxonomy_term_show(context, data_dict):
     :rtype: A dictionary
     """
     _check_access('taxonomy_term_show', context, data_dict)
-    model = context['model']
 
     id = data_dict.get('id')
     uri = data_dict.get('uri')
     label = data_dict.get('label')
+    taxonomy_id = data_dict.get('taxonomy_id')
 
     if not id and not uri and not label:
         raise logic.ValidationError("Either id, uri or label is required")
 
-    term = TaxonomyTerm.getnew(id or uri or label)
+    if(taxonomy_id):
+        term = TaxonomyTerm.get_from_taxonomy(id or uri or label, taxonomy_id)
+    else:
+        term = TaxonomyTerm.getnew(id or uri or label)
 
     if not term:
         raise logic.NotFound()
 
     return term.as_dict()
+
+
+@toolkit.side_effect_free
+def taxonomy_term_show_all(context, data_dict):
+    """
+    Shows a single taxonomy term and its children, the taxonomy id is not
+    required, just a term_id.
+
+    :returns: A single taxonomy term
+    :rtype: A dictionary
+    """
+    _check_access('taxonomy_term_show', context, data_dict)
+
+    label = data_dict.get('label')
+    taxonomy_id = data_dict.get('taxonomy_id')
+
+    if not label:
+        raise logic.ValidationError("Either id, uri or label is required")
+
+    if(taxonomy_id):
+        term = TaxonomyTerm.get_from_taxonomy(label, taxonomy_id)
+    else:
+        term = TaxonomyTerm.get_all(label)
+
+    if not term:
+        raise logic.NotFound()
+
+    return [u.as_dict() for u in term]
 
 
 @toolkit.side_effect_free
@@ -329,10 +373,11 @@ def taxonomy_term_create(context, data_dict):
     uri = logic.get_or_bust(data_dict, 'uri')
     description = data_dict.get('description')
 
-    if model.Session.query(TaxonomyTerm).\
-            filter(TaxonomyTerm.uri == uri).\
-            filter(TaxonomyTerm.taxonomy_id == taxonomy_id ).count() > 0:
-        raise logic.ValidationError("Term uri already used in this taxonomy")
+    if uri is not None:
+        if model.Session.query(TaxonomyTerm).\
+                filter(TaxonomyTerm.uri == uri).\
+                filter(TaxonomyTerm.taxonomy_id == taxonomy_id ).count() > 0:
+            raise logic.ValidationError("Term uri already used in this taxonomy")
 
     term = TaxonomyTerm(**data_dict)
     model.Session.add(term)
