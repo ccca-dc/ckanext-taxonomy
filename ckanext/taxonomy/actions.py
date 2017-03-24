@@ -23,9 +23,14 @@ import ckan.model as model2
 import ckan.lib.navl.dictization_functions
 import ckan.lib.helpers as h
 
+from ckan.logic.validators import isodate
+
+import datetime
+
 _check_access = logic.check_access
 _validate = ckan.lib.navl.dictization_functions.validate
 ValidationError = logic.ValidationError
+_get_action = logic.get_action
 
 
 @toolkit.side_effect_free
@@ -91,7 +96,7 @@ def taxonomy_create(context, data_dict):
 
     title = logic.get_or_bust(data_dict, 'title')
     uri = logic.get_or_bust(data_dict, 'uri')
-    last_modified = logic.get_or_bust(data_dict, 'last_modified')
+    last_modified = data_dict.get('last_modified', "")
 
     if not name:
         name = munge_name(title)
@@ -100,7 +105,10 @@ def taxonomy_create(context, data_dict):
     if model.Session.query(Taxonomy).filter(Taxonomy.name == name).count() > 0:
         raise logic.ValidationError("Name is already in use")
 
-    t = Taxonomy(name=name, title=title, uri=uri, last_modified=last_modified)
+    if last_modified != "":
+        t = Taxonomy(name=name, title=title, uri=uri, last_modified=isodate(last_modified, context))
+    else:
+        t = Taxonomy(name=name, title=title, uri=uri, last_modified=datetime.date.today())
     model.Session.add(t)
     model.Session.commit()
 
@@ -121,24 +129,18 @@ def taxonomy_update(context, data_dict):
     model = context['model']
 
     id = logic.get_or_bust(data_dict, 'id')
-    name = logic.get_or_bust(data_dict, 'name')
-    title = logic.get_or_bust(data_dict, 'title')
-    uri = logic.get_or_bust(data_dict, 'uri')
-    last_modified = logic.get_or_bust(data_dict, 'last_modified')
 
     tax = Taxonomy.get(id)
     if not tax:
         raise logic.NotFound()
 
-    try:
-        last_modified = h.date_str_to_datetime(last_modified)
-    except:
-        raise logic.ValidationError('Timestamp did not parse')
+    tax.name = data_dict.get('name', tax.name)
+    tax.title = data_dict.get('title', tax.title)
+    tax.uri = data_dict.get('name', tax.uri)
+    last_modified = data_dict.get('last_modified', tax.last_modified)
 
-    tax.name = name
-    tax.title = title
-    tax.uri = uri
-    tax.last_modified = last_modified
+    if tax.last_modified != last_modified:
+        tax.last_modified = isodate(last_modified, context)
 
     model.Session.add(tax)
     model.Session.commit()
@@ -396,8 +398,13 @@ def taxonomy_term_update(context, data_dict):
     _check_access('taxonomy_term_update', context, data_dict)
     model = context['model']
 
-    id = logic.get_or_bust(data_dict, 'id')
-    term = TaxonomyTerm.get(id)
+    id = data_dict.get('id')
+    uri = data_dict.get('uri')
+
+    if not id and not uri:
+        raise logic.ValidationError("Either id or uri is required")
+
+    term = TaxonomyTerm.get(id or uri)
 
     if not term:
         raise logic.NotFound()
