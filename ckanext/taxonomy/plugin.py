@@ -1,6 +1,9 @@
 from logging import getLogger
 
 import ckan.plugins as p
+import ckan.plugins.toolkit as tk
+
+from ckanext.taxonomy import validators
 
 log = getLogger(__name__)
 
@@ -24,6 +27,12 @@ class TaxonomyPlugin(p.SingletonPlugin):
         map.connect('taxonomies_show', '/taxonomies/:name',
             controller=ctrl,
             action='show')
+        map.connect('add dataset', 'dataset/new',
+                    controller='ckanext.taxonomy.controllers.package:PackageController',
+                    action='new')
+        map.connect('dataset_edit', '/dataset/edit/{id}',
+                    controller='ckanext.taxonomy.controllers:PackageController',
+                    action='edit')
         return map
 
     def after_map(self, map):
