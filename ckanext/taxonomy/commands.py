@@ -1,7 +1,7 @@
 import logging
 import json
 
-# import rdflib
+import rdflib
 import skos
 
 import ckan.lib.cli as cli
@@ -83,7 +83,7 @@ class TaxonomyCommand(cli.CkanCommand):
         from ckanext.taxonomy.models import remove_tables
         remove_tables()
 
-    '''def load(self):
+    def load(self):
         url = self.options.url
         filename = self.options.filename
         if not url and not filename:
@@ -141,7 +141,7 @@ class TaxonomyCommand(cli.CkanCommand):
 
         for t in top_level:
             self._add_node(tx, t)
-        print 'Load complete''''
+        print 'Load complete'
 
     def load_extras(self):
         '''
