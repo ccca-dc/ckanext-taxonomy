@@ -3,21 +3,6 @@ import ckan.logic as logic
 import ckan.model as model
 import ckan.plugins as p
 import ckan.plugins.toolkit as toolkit
-
-from urllib import urlencode
-
-from ckan.common import config
-from paste.deploy.converters import asbool
-import paste.fileapp
-
-import ckan.lib.maintain as maintain
-import ckan.lib.i18n as i18n
-import ckan.lib.navl.dictization_functions as dict_fns
-import ckan.lib.helpers as h
-import ckan.lib.datapreview as datapreview
-import ckan.lib.plugins
-import ckan.lib.uploader as uploader
-import ckan.lib.render
 import json
 
 from ckan.common import OrderedDict, _, json, request, c, g, response
