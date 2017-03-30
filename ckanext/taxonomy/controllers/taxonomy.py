@@ -71,7 +71,7 @@ class TaxonomyController(base.BaseController):
             taxonomy_term = term[0]
 
             for t in term:
-                if "gemet" in t['uri']:
+                if t['uri'] is not None and "gemet" in t['uri']:
                     taxonomy_term = t
 
             taxonomy_id = taxonomy_term['taxonomy_id']
