@@ -20,19 +20,24 @@ class TaxonomyPlugin(p.SingletonPlugin):
     p.implements(p.ITemplateHelpers, inherit=True)
 
     def before_map(self, map):
-        ctrl = 'ckanext.taxonomy.controllers:TaxonomyController'
+        ctrl = 'ckanext.taxonomy.controllers.taxonomy:TaxonomyController'
         map.connect('taxonomies_index', '/taxonomies',
-            controller=ctrl,
-            action='index')
+                    controller=ctrl,
+                    action='index')
         map.connect('taxonomies_show', '/taxonomies/:name',
-            controller=ctrl,
-            action='show')
+                    controller=ctrl,
+                    action='show')
+        map.connect('get_infos_from_keyword_label', '/get_infos_from_keyword_label',
+                    controller='ckanext.taxonomy.controllers.taxonomy:TaxonomyController',
+                    action='get_infos_from_keyword_label')
         map.connect('add dataset', 'dataset/new',
                     controller='ckanext.taxonomy.controllers.package:PackageController',
                     action='new')
         map.connect('dataset_edit', '/dataset/edit/{id}',
-                    controller='ckanext.taxonomy.controllers:PackageController',
+                    controller='ckanext.taxonomy.controllers.package:PackageController',
                     action='edit')
+
+
         return map
 
     def after_map(self, map):

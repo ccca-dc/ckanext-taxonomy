@@ -2,7 +2,7 @@
 
 {% block breadcrumb_content %}
   <li>{{ h.nav_link(_('Datasets'), controller='package', action='search') }}</li>
-  <li class="active">{{ h.nav_link(_('Taxonomies'), controller='ckanext.taxonomy.controllers:TaxonomyController', action='index') }}</li>
+  <li class="active">{{ h.nav_link(_('Taxonomies'), controller='ckanext.taxonomy.controllers.taxonomy:TaxonomyController', action='index') }}</li>
 {% endblock %}
 
 {% block primary_content %}
