@@ -114,7 +114,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
                 //keyword got added
                 var keyword = mutation.addedNodes[0].children[0].innerHTML;
 
-                var thesaurus = $('#field-selectThesaurus').val();
+                var thesaurus = $('#selectThesaurus').val();
 
                 //check if no thesaurus was selected in the search field
                 var data = new FormData();
@@ -220,7 +220,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
      * Returns a jqXHR promise.
      */
     getCompletions: function (string, fn) {
-      var taxName = $( "#field-selectThesaurus" ).val();
+      var taxName = $( "#selectThesaurus" ).val();
       var parts  = this.options.source.split('?');
       var end    = parts.pop();
       // var source = parts.join('?') + encodeURIComponent(string) + end + "&tax_name=" + this.options.taxonomy_name;
