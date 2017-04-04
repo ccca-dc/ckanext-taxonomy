@@ -1,0 +1,26 @@
+{
+  "scheming_presets_version": 1,
+  "about": "these are the default scheming/mdedit field presets",
+  "about_url": "http://github.com/ccca-dc/ckanext-taxonomy",
+  "mdedit_note": "These notes (mdedit_note field) are not processed and serve just for user information",
+  "presets": [
+    {
+      "preset_name": "taxonomy_tag_string_autocomplete",
+      "values": {
+        "form_snippet": "taxonomy_keywords.html",
+        "form_attrs": {
+          "data-module": "taxonomy_term_autocomplete",
+          "data-module-tags": "true",
+          "data-module-source": "/api/action/taxonomy_term_autocomplete?q=?"
+        }
+      }
+    },
+    {
+      "preset_name": "taxonomy_thesauri",
+      "values": {
+        "form_snippet": "taxonomy_thesauri.html",
+        "display_snippet": "taxonomy_thesauri.html"
+    }
+  }
+  ]
+}

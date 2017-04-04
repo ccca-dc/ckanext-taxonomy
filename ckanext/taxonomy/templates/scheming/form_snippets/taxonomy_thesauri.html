@@ -1,0 +1,20 @@
+{% import 'macros/form.html' as form %}
+
+{% call form.input(
+  'thesaurus_help',
+  id='thesaurus_help',
+  label=h.scheming_language_text(field.label),
+  value=h.parse_used_thesauri(data.get(field.field_name, '')),
+  type='text',
+  error=errors[field.field_name],
+  classes=['control-medium'],
+  attrs=field.form_attrs if 'form_attrs' in field else {},
+  is_required=h.scheming_field_required(field)
+  )
+%}
+
+    <input name="{{ field.field_name }}" id="field-{{ field.field_name }}" value="{{ data.get(field.field_name, '') }}" type="hidden"/>
+
+    {%- snippet 'scheming/form_snippets/help_text.html', field=field -%}
+
+{% endcall %}

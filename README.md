@@ -25,6 +25,7 @@ To install ckanext-taxonomy, you should follow these steps:
     NB you should not use `pip install -e` to install it, since that appears to install the copy of python-skos from PyPI when it should install the DGU version. If you get this wrong then you get erro `TypeError: init() got an unexpected keyword argument 'lang'`
 
 2. Add ```taxonomy``` to your ckan.plugins setting in your ckan.ini file
+    If you are using this plugin with ckanext-scheming then add ```ckanext.taxonomy:presets.json``` to the scheming.presets in your ckan.ini file
 3. Setup the database for taxonomies
 
 
