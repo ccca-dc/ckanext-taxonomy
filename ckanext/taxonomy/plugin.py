@@ -3,7 +3,7 @@ from logging import getLogger
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
-from ckanext.taxonomy import validators
+from ckanext.taxonomy import validators as v
 
 log = getLogger(__name__)
 
@@ -13,11 +13,13 @@ class TaxonomyPlugin(p.SingletonPlugin):
     Taxonomy plugin that provides hierarchical 'tags'.
     '''
 
+
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.IActions, inherit=True)
     p.implements(p.IAuthFunctions, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
+    p.implements(p.IValidators)
 
     def before_map(self, map):
         ctrl = 'ckanext.taxonomy.controllers.taxonomy:TaxonomyController'
@@ -94,3 +96,9 @@ class TaxonomyPlugin(p.SingletonPlugin):
             'taxonomy_term_update': auth.taxonomy_term_update,
             'taxonomy_term_delete': auth.taxonomy_term_delete
         }
+
+    # IValidators
+    def get_validators(self):
+        return {
+            'taxonomy_check_vocab': v.taxonomy_check_vocab
+            }

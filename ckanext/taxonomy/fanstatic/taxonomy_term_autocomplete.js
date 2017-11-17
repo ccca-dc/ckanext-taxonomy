@@ -82,6 +82,8 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
       }
       var select2 = this.el.select2(settings).data('select2');
 
+      select2.search.on('keydown', this._onKeydown);
+
       if (this.options.tags && select2 && select2.search) {
         // find the "fake" input created by select2 and add the keypress event.
         // This is not part of the plugins API and so may break at any time.
@@ -98,7 +100,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
 
       //thesaurus section
       try {
-          var vars = JSON.parse($('#field-iso_thesaName').val());
+          var vars = JSON.parse($('#field-controlled_tags').val());
       } catch (e) {
           var vars = [];
       }
@@ -146,10 +148,10 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
                 if(taxonomy_date == null){
                     taxonomy_date = "";
                 }
-
+              //  if (thesaurus != "")
                 vars.push({taxonomy_term: keyword, uri: uri, taxonomy: thesaurus, taxonomy_date: taxonomy_date});
 
-                $('#field-iso_thesaName').val(JSON.stringify(vars));
+                $('#field-controlled_tags').val(JSON.stringify(vars));
 
                 //check if thesaurus hasn't been used by another keyword yet
                 if(thesaurus != "" && usedThesauri.split(", ").indexOf(thesaurus) < 0){
@@ -163,7 +165,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
                 //keyword got deleted
                 var keyword = mutation.removedNodes[0].children[0].innerHTML;
 
-                //deleting the keyword-taxonomy entry in the field-iso_thesaName
+                //deleting the keyword-taxonomy entry in the field-controlled_tags
                 for(var x=0; x<vars.length; x++) {
                     if(vars[x]['taxonomy_term'] == keyword){
                         var taxonomy = vars[x]['taxonomy'];
@@ -171,7 +173,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
                     }
                 }
 
-                $('#field-iso_thesaName').val(JSON.stringify(vars));
+                $('#field-controlled_tags').val(JSON.stringify(vars));
 
                 if(taxonomy != ""){
                     //checking if the taxonomy is still used by another keyword
@@ -220,6 +222,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
      * Returns a jqXHR promise.
      */
     getCompletions: function (string, fn) {
+
       var taxName = $( "#selectThesaurus" ).val();
       var parts  = this.options.source.split('?');
       var end    = parts.pop();
@@ -263,6 +266,7 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
       fn({results:[]});
 
       if (string) {
+
         // Set a timer to prevent the search lookup occurring too often.
         this._debounced = setTimeout(function () {
           var term = module._lastTerm;
@@ -292,7 +296,19 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
      * Returns a text string.
      */
     formatResult: function (state, container, query) {
+
       var term = this._lastTerm || null; // same as query.term
+
+      // Anja - 17.11.17: only controlled vocabulary
+      if (query.term == state.id){
+        // in this case we have no controlled variable
+        //.log ("yeah");
+        //this.formatNoMatches("yeah");
+        this._select2.search.on('keydown', this._onKeydown);
+
+        // Do not add term to select2 list
+        return;
+      }
       if (container) {
         // Append the select id to the element for styling.
         container.attr('data-value', state.id);
@@ -306,7 +322,8 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
      * Returns a text string.
      */
     formatNoMatches: function (term) {
-      return !term ? this.i18n('emptySearch') : this.i18n('noMatches');
+        //return this.i18n('noMatches');
+       return !term ? this.i18n('emptySearch') : this.i18n('noMatches');
     },
 
     /* Formatter used by the select2 plugin that returns a string when the
@@ -373,12 +390,20 @@ this.ckan.module('taxonomy_term_autocomplete', function (jQuery, _) {
      * Returns nothing.
      */
     _onKeydown: function (event) {
+
+      // Anja, 17.11.17: prevent free keywords - choose only via select
+      if ((event.which === 13) || (event.which === 188)) {
+        event.preventDefault();
+
+      // Original
+      /*
       if (event.which === 188) {
         event.preventDefault();
         setTimeout(function () {
           var e = jQuery.Event("keydown", { which: 13 });
           jQuery(event.target).trigger(e);
       }, 10);
+      */
   }
     }
   };
