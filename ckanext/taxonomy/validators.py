@@ -4,6 +4,7 @@ import ckan.logic as logic
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 import json
+import ast
 
 from ckanext.scheming.validation import scheming_validator
 ignore_empty = plugins.toolkit.get_validator('ignore_empty')
@@ -14,24 +15,43 @@ StopOnError = df.StopOnError
 Missing = df.Missing
 missing = df.missing
 
-def taxonomy_check_vocab(key, data, errors, context):
+@scheming_validator
+def taxonomy_check_vocab(field, schema):
 
-# if there was an error before calling our validator
-    # don't bother with our validation
-    if errors[key]:
+    def validator(key, data, errors, context):
+
+        # if there was an error before calling our validator
+        # don't bother with our validation
+        if errors[key]:
             return
 
-    value = data.get(key)
-
-    print key
-    print value
-
-    if value is not missing:
-        if not isinstance(value, (list, str, unicode)):
-            errors[key].append(_('expecting list of strings or dicts in list as string'))
+        if data:
+            tags = data.get(key)
+        else:
             return
-    else:
-        return
+
+        if tags:
+            tag_list = tags.split(',')
+        else:
+            return
+
+        controlled_tags = data.get(('controlled_tags',))
+
+        if controlled_tags:
+            voc_list = json.loads(controlled_tags)
+        else:
+            return
+
+        not_found =[]
+
+        for x in tag_list:
+            if any (d['taxonomy_term'] == x and d['taxonomy'] == "" for d in voc_list):
+                not_found.append(x)
+
+        if not_found:
+            errors[key].append('Please use only keywords from controlled vocabularies: %s not found '  %', '.join(not_found))
+
+    return validator
 
 def taxonomy_exists(value, context):
     try:

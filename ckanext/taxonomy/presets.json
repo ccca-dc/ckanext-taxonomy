@@ -13,7 +13,6 @@
           "data-module-source": "/api/action/taxonomy_term_autocomplete?q=?"
         },
         "validators": "taxonomy_check_vocab"
-
       }
     },
     {
