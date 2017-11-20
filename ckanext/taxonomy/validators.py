@@ -35,6 +35,8 @@ def taxonomy_check_vocab(field, schema):
         else:
             return
 
+        print data
+        # Attention! Must be this way: data.get(('controlled_tags',)) - flatten dict
         controlled_tags = data.get(('controlled_tags',))
 
         if controlled_tags:
