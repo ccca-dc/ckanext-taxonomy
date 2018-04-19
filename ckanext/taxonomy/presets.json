@@ -11,7 +11,8 @@
           "data-module": "taxonomy_term_autocomplete",
           "data-module-tags": "true",
           "data-module-source": "/api/action/taxonomy_term_autocomplete?q=?"
-        }
+        },
+        "validators": "taxonomy_check_vocab"
       }
     },
     {

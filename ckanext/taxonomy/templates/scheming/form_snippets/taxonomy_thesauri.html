@@ -1,5 +1,14 @@
 {% import 'macros/form.html' as form %}
 
+{% set form_attrs = {} %}
+{% if 'form_attrs' in field %}
+    {% set form_attrs = field.form_attrs %}
+{% endif %}
+
+{% if form_attrs %}
+    {% do form_attrs.update({"class": "form-control"}) %}
+{% endif %}
+
 {% call form.input(
   'thesaurus_help',
   id='thesaurus_help',
@@ -8,7 +17,7 @@
   type='text',
   error=errors[field.field_name],
   classes=['control-medium'],
-  attrs=field.form_attrs if 'form_attrs' in field else {},
+  attrs=form_attrs,
   is_required=h.scheming_field_required(field)
   )
 %}
