@@ -26,12 +26,14 @@ To install ckanext-taxonomy, you should follow these steps:
 
 2. Add ```taxonomy``` to your ckan.plugins setting in your ckan.ini file
     If you are using this plugin with ckanext-scheming then add ```ckanext.taxonomy:presets.json``` to the scheming.presets in your ckan.ini file
-3. Setup the database for taxonomies
 
+
+3. Setup the database for taxonomies
 
     ```
     paster taxonomy init -c <PATH-TO-CONFIG>
     ```
+4.  Run the scripts in 'create_taxonomies' to create the taxonomy files (Insert APIkeys)
 
 
 ## Running tests
